@@ -1,0 +1,10 @@
+availability_zone:
+  us_west_2:
+    first:  us-west-2a
+    second: us-west-2b
+  us_east_1:
+    first:  us-east-1c
+    second: us-east-1e
+
+  
+  

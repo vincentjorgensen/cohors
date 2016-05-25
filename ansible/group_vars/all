@@ -1,0 +1,38 @@
+---
+amis:
+  xenial:
+    us_west_2:    ami-06b94666
+    us_west_1:    ami-84423ae4
+    us_east_1:    ami-13be557e
+    eu_west_1:    ami-7a138709
+    eu_central_1: ami-f9e30f96
+  trusty:
+    us_west_2:    ami-8c4cb0ec
+    us_west_1:    ami-c74a32a7
+    us_east_1:    ami-50759d3d
+    eu_west_1:    ami-4070e433
+    eu_central_1: ami-9cee02f3
+availability_zone:
+  us_west_2:
+    first:  us-west-2a
+    second: us-west-2b
+  us_east_1:
+    first:  us-east-1c
+    second: us-east-1e
+second_octet:
+  dev:
+    us_west_2:
+      vpc: 0     # 10.0.0.0/16
+      vpn: 1     # 10.1.0.0/16
+    us_west_1:
+      vpc: 4     # 10.4.0.0/16
+      vpn: 5     # 10.5.0.0/16
+    us_east_1:
+      vpc: 8     # 10.8.0.0/16
+      vpn: 9     # 10.9.0.0/16
+    eu_west_1:
+      vpc: 12    # 10.12.0.0/16
+      vpn: 13    # 10.13.0.0/16
+  eu_central_1:
+      vpc: 16    # 10.16.0.0/16
+      vpn: 17    # 10.17.0.0/16

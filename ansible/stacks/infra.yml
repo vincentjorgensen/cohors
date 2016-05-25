@@ -1,0 +1,445 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Cohors Infrastructure
+Parameters:
+  AppName:
+    Type: String
+  AZ1:
+    Type: String
+  AZ2:
+    Type: String
+  Environs:
+    Type: String
+  Region:
+    Type: String
+  SecondOctet:
+    Type: String
+Resources:
+  FirstPrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: AZ1
+      CidrBlock:
+        Fn::Join:
+        - ''
+        - - '10.'
+          - Ref: SecondOctet
+          - '.128.0/19'
+      MapPublicIpOnLaunch: False
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - FirstPrivateSubnet
+            - '-'
+            - Ref: Environs
+  SecondPrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: AZ2
+      CidrBlock:
+        Fn::Join:
+        - ''
+        - - '10.'
+          - Ref: SecondOctet
+          - '.160.0/19'
+      MapPublicIpOnLaunch: False
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - SecondPrivateSubnet
+            - '-'
+            - Ref: Environs
+  FirstPrivateRDSSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: AZ1
+      CidrBlock:
+        Fn::Join:
+        - ''
+        - - '10.'
+          - Ref: SecondOctet
+          - '.192.0/19'
+      MapPublicIpOnLaunch: False
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - FirstPrivateRDSSubnet
+            - '-'
+            - Ref: Environs
+  SecondPrivateRDSSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: AZ2
+      CidrBlock:
+        Fn::Join:
+        - ''
+        - - '10.'
+          - Ref: SecondOctet
+          - .224.0/19
+      MapPublicIpOnLaunch: False
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - SecondPrivateRDSSubnet
+            - '-'
+            - Ref: Environs
+  FirstPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: AZ1
+      CidrBlock:
+        Fn::Join:
+        - ''
+        - - '10.'
+          - Ref: SecondOctet
+          - '.0.0/18'
+      MapPublicIpOnLaunch: True
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - FirstPublicSubnet
+            - '-'
+            - Ref: Environs
+  SecondPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: AZ2
+      CidrBlock:
+        Fn::Join:
+        - ''
+        - - '10.'
+          - Ref: SecondOctet
+          - '.64.0/18'
+      MapPublicIpOnLaunch: False
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - SecondPublicSubnet
+            - '-'
+            - Ref: Environs
+  #############################################################################
+  # Route Tables
+  #----------------------------------------------------------------------------
+  FirstPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - FirstPublicRouteTable
+            - '-'
+            - Ref: Environs
+  SecondPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - SecondPublicRouteTable
+            - '-'
+            - Ref: Environs
+  FirstPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - FirstPrivateRouteTable
+            - '-'
+            - Ref: Environs
+  SecondPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - SecondPrivateRouteTable
+            - '-'
+            - Ref: Environs
+  #############################################################################
+  # Common Security Group
+  #----------------------------------------------------------------------------
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access VPC from entire subnet
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 22
+        IpProtocol: TCP
+        ToPort: 22
+      - CidrIp: 10.0.0.0/8
+        FromPort: -1
+        IpProtocol: -1
+        ToPort: -1
+      VpcId:
+        Ref: Vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - Ref: Environs
+  SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      FromPort: '0'
+      GroupId:
+        Ref: SecurityGroup
+      IpProtocol: "-1"
+      SourceSecurityGroupId:
+        Ref: SecurityGroup
+      ToPort: '65535'
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock:
+        Fn::Join:
+        - ''
+        - - '10.'
+          - Ref: SecondOctet
+          - '.0.0/16'
+      EnableDnsSupport: True
+      EnableDnsHostnames: True
+      InstanceTenancy: default
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - Ref: Environs
+  #############################################################################
+  # Routes
+  #----------------------------------------------------------------------------
+  FirstPrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: FirstNatGateway
+      RouteTableId:
+        Ref: FirstPrivateRouteTable
+  SecondPrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: SecondNatGateway
+      RouteTableId:
+        Ref: SecondPrivateRouteTable
+  FirstPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+      RouteTableId:
+        Ref: FirstPublicRouteTable
+  SecondPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+      RouteTableId:
+        Ref: SecondPublicRouteTable
+  #############################################################################
+  # Internet Gateway
+  #----------------------------------------------------------------------------
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: Region
+            - '-'
+            - Ref: AppName
+            - '-'
+            - Ref: Environs
+  EIP1:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  EIP2:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  FirstNatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - EIP1
+          - AllocationId
+      SubnetId:
+        Ref: FirstPublicSubnet
+  SecondNatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - EIP2
+          - AllocationId
+      SubnetId:
+        Ref: SecondPublicSubnet
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId:
+        Ref: InternetGateway
+      VpcId:
+        Ref: Vpc
+Outputs:
+  FirstPrivateSubnet:
+    Description: Vpc first private subnet
+    Value:
+      Ref: FirstPrivateSubnet
+  FirstPrivateRDSSubnet:
+    Description: Vpc first private RDS subnet
+    Value:
+      Ref: FirstPrivateRDSSubnet
+  FirstPublicSubnet:
+    Description: Vpc first public subnet
+    Value:
+      Ref: FirstPublicSubnet
+  SecondPrivateSubnet:
+    Description: Vpc second private subnet
+    Value:
+      Ref: SecondPrivateSubnet
+  SecondPrivateRDSSubnet:
+    Description: Vpc second private RDS subnet
+    Value:
+      Ref: SecondPrivateRDSSubnet
+  SecondPublicSubnet:
+    Description: Vpc second public subnet
+    Value:
+      Ref: SecondPublicSubnet
+  SecurityGroup:
+    Description: Common security group to whole column
+    Value:
+      Ref: SecurityGroup
+  FirstPublicRouteTable:
+    Description: First Public Route Table
+    Value:
+      Ref: FirstPublicRouteTable
+  SecondPublicRouteTable:
+    Description: Second Public Route Table
+    Value:
+      Ref: SecondPublicRouteTable
+  FirstPrivateRouteTable:
+    Description: First Private Route Table
+    Value:
+      Ref: FirstPrivateRouteTable
+  SecondPrivateRouteTable:
+    Description: Second Private Route Table
+    Value:
+      Ref: SecondPrivateRouteTable
+  Vpc:
+    Description: Vpc column
+    Value:
+      Ref: Vpc
+  FirstAvailabilityZone:
+    Description: First availability zone
+    Value:
+      Ref: AZ1
+  SecondAvailabilityZone:
+    Description: First availability zone
+    Value:
+      Ref: AZ2

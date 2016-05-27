@@ -1,100 +1,47 @@
 ---
 Description: OpenVPN Server
 Parameters:
-  ClientPoolCidr:
+  AppName:
     Type: String
-  DnsZone:
+  PublicDnsZone:
     Type: String
+  PrivateDnsZone:
+    Type: String
+  CohorsSecurityGroup:
+    Type: SecurityGroup
   Environs:
     Type: String
   ExternalRouteTableId:
-    Type: String
+    Type: AWS::EC2::RouteTable
   ImageId:
     Type: String
   InstanceType:
     Type: String
   InternalRouteTableId:
-    Type: String
+    Type: AWS::EC2::RouteTable
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
-  S3Bucket:
+  Region:
     Type: String
-  S3Prefix:
+  SecondVpnOctet:
     Type: String
   SubnetId:
     Type: AWS::EC2::Subnet::Id
-  VpcName:
-    Type: String
   VpcId:
     Type: AWS::EC2::VPC::Id
-  VpcNetString:
-    Type: String
-  VpnCidr:
-    Type: String
-  VpnString:
-    Type: String
 Resources:
-  IAMUser:
-    Type: AWS::IAM::User
-    Properties:
-      Policies:
-      - PolicyName: IAMAccess
-        PolicyDocument:
-          Statement:
-          - Effect: Allow
-            NotAction: iam:*
-            Resource: "*"
-  HostKeys:
-    Type: AWS::IAM::AccessKey
-    Properties:
-      UserName:
-        Ref: IAMUser
-  VpnAccessServerRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - ec2.amazonaws.com
-          Action:
-          - sts:AssumeRole
-      Path: "/VpnAccessServer/"
-      Policies:
-      - PolicyName: VpnAccessServerPolicy
-        PolicyDocument:
-          Statement:
-          - Effect: Allow
-            Action:
-            - s3:Get*
-            Resource:
-              Fn::Join:
-              - ''
-              - - 'arn:aws:s3:::'
-                - Ref: S3Bucket
-                - "/"
-                - Ref: S3Prefix
-                - "/*"
-  VpnAccessServerProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Path: "/VpnAccessServer/"
-      Roles:
-      - Ref: VpnAccessServerRole
   VpnInstance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId:
         Ref: ImageId
-      InstanceType: t2.medium
-      IamInstanceProfile:
-        Ref: VpnAccessServerProfile
+      InstanceType:
+        Ref: InstanceType
       KeyName:
         Ref: KeyName
       SecurityGroupIds:
       - Ref: SecurityGroup
+      - Ref: CohorsSecurityGroup
       SourceDestCheck: 'False'
       SubnetId:
         Ref: SubnetId
@@ -129,7 +76,11 @@ Resources:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock:
-        Ref: VpnCidr
+        Fn::Join:
+        - ''
+        - - '10.'
+          - Ref: SecondVpnOctet
+          - '.0.0/16'
       InstanceId:
         Ref: VpnInstance
       RouteTableId:
@@ -138,7 +89,11 @@ Resources:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock:
-        Ref: VpnCidr
+        Fn::Join:
+        - ''
+        - - '10.'
+          - Ref: SecondVpnOctet
+          - '.0.0/16'
       InstanceId:
         Ref: VpnInstance
       RouteTableId:
@@ -157,14 +112,6 @@ Resources:
         IpProtocol: -1
         FromPort: '-1'
         ToPort: '-1'
-      - CidrIp: 172.16.0.0/12
-        IpProtocol: -1
-        FromPort: '-1'
-        ToPort: '-1'
-      - CidrIp: 0.0.0.0/0 # temporary
-        IpProtocol: tcp
-        FromPort: '22'
-        ToPort: '22'
       Tags:
       - Key: Name
         Value: vpn-access-sg

@@ -3,9 +3,9 @@ Description: OpenVPN Server
 Parameters:
   ClientPoolCidr:
     Type: String
-  DeployEnvironment:
-    Type: String
   DnsZone:
+    Type: String
+  Environs:
     Type: String
   ExternalRouteTableId:
     Type: String
@@ -21,12 +21,6 @@ Parameters:
     Type: String
   S3Prefix:
     Type: String
-  SiteToSiteCoreNetwork:
-    Type: String
-  SiteToSiteVpnGroup:
-    Type: String
-  SiteToSiteVpnType:
-    Type: String
   SubnetId:
     Type: AWS::EC2::Subnet::Id
   VpcName:
@@ -39,55 +33,6 @@ Parameters:
     Type: String
   VpnString:
     Type: String
-Conditions:
-  ProdCore:
-    Fn::Or:
-    - Fn::And:
-      - Fn::Equals:
-        - Ref: SiteToSiteVpnGroup
-        - prod
-      - Fn::Equals:
-        - Ref: SiteToSiteVpnType
-        - core
-    - Fn::Equals:
-      - Ref: SiteToSiteVpnType
-      - infra
-  ProdEdge:
-    Fn::And:
-    - Fn::Equals:
-      - Ref: SiteToSiteVpnGroup
-      - prod
-    - Fn::Equals:
-      - Ref: SiteToSiteVpnType
-      - edge
-  DevCore:
-    Fn::Or:
-    - Fn::And:
-      - Fn::Equals:
-        - Ref: SiteToSiteVpnGroup
-        - dev
-      - Fn::Equals:
-        - Ref: SiteToSiteVpnType
-        - core
-    - Fn::Equals:
-      - Ref: SiteToSiteVpnType
-      - infra
-  DevEdge:
-    Fn::And:
-    - Fn::Equals:
-      - Ref: SiteToSiteVpnGroup
-      - dev
-    - Fn::Equals:
-      - Ref: SiteToSiteVpnType
-      - edge
-  EdgeVpc:
-    Fn::Equals:
-    - Ref: SiteToSiteVpnType
-    - edge
-  # InfraVpc:
-  #   Fn::Equals:
-  #   - Ref: SiteToSiteVpnType
-  #   - infra
 Resources:
   IAMUser:
     Type: AWS::IAM::User
@@ -157,117 +102,6 @@ Resources:
       - Key: Name
         Value:
           Ref: AWS::StackName
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-          - ''
-          - - |
-              #!/bin/bash -ex
-            - "/usr/local/bin/cfn-init -s "
-            - Ref: AWS::StackId
-            - " -r VpnInstance "
-            - "--region "
-            - Ref: AWS::Region
-            - " \n"
-            - |
-              chef-client --runlist "recipe[sc_base::default],recipe[sc_vpn_access::access_server]"
-    Metadata:
-      AWS::CloudFormation::Authentication:
-        S3AccessCreds:
-          type: S3
-          roleName:
-            Ref: VpnAccessServerRole
-          buckets:
-          - Ref: S3Bucket
-        ChefValidator:
-          type: S3
-          accessKeyId:
-            Ref: HostKeys
-          secretKey:
-            Fn::GetAtt:
-            - HostKeys
-            - SecretAccessKey
-          buckets: ["spongecell-infra"]
-      AWS::CloudFormation::Init:
-        config:
-          commands:
-            mkdir:
-              command: mkdir -p /etc/chef/trusted_certs
-          files:
-            "/etc/chef/trusted_certs/us-east-1-infra-chef_spongecell_net.crt":
-              authentication: ChefValidator
-              source: https://s3.amazonaws.com/spongecell-infra/us-east-1-infra-chef/server_certs/us-east-1-infra-chef.spongecell.net.crt
-            "/etc/chef/spongecell_validator.pem":
-              authentication: ChefValidator
-              source: https://s3.amazonaws.com/spongecell-infra/us-east-1-infra-chef/validators/spongecell_validator.pem
-            "/etc/chef/node.json":
-              context:
-                vpc_name:
-                  Ref: VpcName
-              content: |
-                {
-                  "vpc_name": "{{vpc_name}}"
-                }
-            "/etc/chef/client.rb":
-              context:
-                deploy_environment:
-                  Ref: DeployEnvironment
-              content: |
-                chef_server_url "https://chef-public.spongecell.net/organizations/spongecell"
-                environment "{{deploy_environment}}"
-                json_attribs "/etc/chef/node.json"
-                validation_client_name "spongecell-validator"
-                validation_key "/etc/chef/spongecell_validator.pem"
-                ssl_verify_mode :verify_none
-
-            "/etc/openvpn/server.crt":
-              source:
-                Fn::Join:
-                - ''
-                - - http://
-                  - Ref: S3Bucket
-                  - ".s3.amazonaws.com/"
-                  - Ref: S3Prefix
-                  - "/server.crt"
-              mode: '000440'
-              owner: root
-              authentication: S3AccessCreds
-            "/etc/openvpn/server.key":
-              source:
-                Fn::Join:
-                - ''
-                - - http://
-                  - Ref: S3Bucket
-                  - ".s3.amazonaws.com/"
-                  - Ref: S3Prefix
-                  - "/server.key"
-              mode: '000400'
-              owner: root
-              authentication: S3AccessCreds
-            "/etc/openvpn/dh1024.pem":
-              source:
-                Fn::Join:
-                - ''
-                - - http://
-                  - Ref: S3Bucket
-                  - ".s3.amazonaws.com/"
-                  - Ref: S3Prefix
-                  - "/dh1024.pem"
-              mode: '000440'
-              owner: root
-              authentication: S3AccessCreds
-            "/etc/openvpn/ca.crt":
-              source:
-                Fn::Join:
-                - ''
-                - - http://
-                  - Ref: S3Bucket
-                  - ".s3.amazonaws.com/"
-                  - Ref: S3Prefix
-                  - "/ca.crt"
-              mode: '000440'
-              owner: root
-              authentication: S3AccessCreds
   ElasticIp:
     Type: AWS::EC2::EIP
     Properties:
@@ -309,104 +143,6 @@ Resources:
         Ref: VpnInstance
       RouteTableId:
         Ref: ExternalRouteTableId
-
-  # site-to-site routes
-  # EdgeRouteTableEntry:
-  #   Condition: EdgeVpc
-  #   Type: AWS::EC2::Route
-  #   Properties:
-  #     DestinationCidrBlock:
-  #       Ref: SiteToSiteCoreNetwork
-  #     InstanceId:
-  #       Ref: VpnInstance
-  #     RouteTableId:
-  #       Ref: InternalRouteTableId
-  # EdgeRouteTableEntry2:
-  #   Condition: EdgeVpc
-  #   Type: AWS::EC2::Route
-  #   Properties:
-  #     DestinationCidrBlock: "10.64.0.0/16" # us-east-1-infra (for chef)
-  #     InstanceId:
-  #       Ref: VpnInstance
-  #     RouteTableId:
-  #       Ref: InternalRouteTableId
-  # EdgeRouteTableEntry3:
-  #   Condition: EdgeVpc
-  #   Type: AWS::EC2::Route
-  #   Properties:
-  #     DestinationCidrBlock: "10.64.0.0/16" # us-east-1-infra (for chef)
-  #     InstanceId:
-  #       Ref: VpnInstance
-  #     RouteTableId:
-  #       Ref: ExternalRouteTableId
-
-  # CoreRouteTableEntry1:
-  #   Condition: DevCore
-  #   Type: AWS::EC2::Route
-  #   Properties:
-  #     DestinationCidrBlock: "10.101.0.0/16" # us-east-1-dev-edge
-  #     InstanceId:
-  #       Ref: VpnInstance
-  #     RouteTableId:
-  #       Ref: InternalRouteTableId
-  # CoreRouteTableEntry2:
-  #   Condition: DevCore
-  #   Type: AWS::EC2::Route
-  #   Properties:
-  #     DestinationCidrBlock: "10.105.0.0/16" # us-west-2-dev-edge
-  #     InstanceId:
-  #       Ref: VpnInstance
-  #     RouteTableId:
-  #       Ref: InternalRouteTableId
-
-  # CoreRouteTableEntry3:
-  #   Condition: ProdCore
-  #   Type: AWS::EC2::Route
-  #   Properties:
-  #     DestinationCidrBlock: "10.71.0.0/16" # "us-east-1-prod-edge"      => "10.71.0.0/16",
-  #     InstanceId:
-  #       Ref: VpnInstance
-  #     RouteTableId:
-  #       Ref: InternalRouteTableId
-  # CoreRouteTableEntry4:
-  #   Condition: ProdCore
-  #   Type: AWS::EC2::Route
-  #   Properties:
-  #     DestinationCidrBlock: "10.72.0.0/16" # "us-west-2-prod-edge"      => "10.72.0.0/16",
-  #     InstanceId:
-  #       Ref: VpnInstance
-  #     RouteTableId:
-  #       Ref: InternalRouteTableId
-  # CoreRouteTableEntry5:
-  #   Condition: ProdCore
-  #   Type: AWS::EC2::Route
-  #   Properties:
-  #     DestinationCidrBlock: "10.80.0.0/16" # "ap-southeast-2-prod-edge" => "10.80.0.0/16",
-  #     InstanceId:
-  #       Ref: VpnInstance
-  #     RouteTableId:
-  #       Ref: InternalRouteTableId
-  # CoreRouteTableEntry6:
-  #   Condition: ProdCore
-  #   Type: AWS::EC2::Route
-  #   Properties:
-  #     DestinationCidrBlock: "10.90.0.0/16" # "eu-west-1-prod-edge"      => "10.90.0.0/16",
-  #     InstanceId:
-  #       Ref: VpnInstance
-  #     RouteTableId:
-  #       Ref: InternalRouteTableId
-
-    # "us-east-1-dev-core"       => "10.100.0.0/16",
-    # "us-east-1-dev-edge"       => "10.101.0.0/16",
-    # "us-west-2-dev-edge"       => "10.105.0.0/16",
-    # "us-east-1-prod-core"      => "172.16.0.0/16",
-    # "us-east-1-prod-edge"      => "10.71.0.0/16",
-    # "us-west-2-prod-edge"      => "10.72.0.0/16",
-    # "eu-west-1-prod-edge"      => "10.90.0.0/16",
-    # "ap-southeast-2-prod-edge" => "10.80.0.0/16",
-    # "us-east-1-infra"          => "10.64.0.0/16",
-
-
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

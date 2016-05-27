@@ -338,6 +338,51 @@ Resources:
       RouteTableId:
         Ref: SecondPublicRouteTable
   #############################################################################
+  # Subnet Route Table Associations
+  #----------------------------------------------------------------------------
+  FirstPublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: FirstPublicRouteTable
+      SubnetId:
+        Ref: FirstPublicSubnet
+  FirstPrivateSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: FirstPrivateRouteTable
+      SubnetId:
+        Ref: FirstPrivateSubnet
+  FirstPrivateRDSSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: FirstPrivateRouteTable
+      SubnetId:
+        Ref: FirstPrivateRDSSubnet
+  SecondPublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: SecondPublicRouteTable
+      SubnetId:
+        Ref: SecondPublicSubnet
+  SecondPrivateSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: SecondPrivateRouteTable
+      SubnetId:
+        Ref: SecondPrivateSubnet
+  SecondPrivateRDSSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: SecondPrivateRouteTable
+      SubnetId:
+        Ref: SecondPrivateRDSSubnet
+  #############################################################################
   # Internet Gateway
   #----------------------------------------------------------------------------
   InternetGateway:

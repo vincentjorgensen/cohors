@@ -108,6 +108,91 @@
     },
     "Description": "Cohors Infrastructure",
     "Resources": {
+        "SecondPrivateSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "SecondPrivateSubnet"
+                },
+                "RouteTableId": {
+                    "Ref": "SecondPrivateRouteTable"
+                }
+            }
+        },
+        "FirstPrivateSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "FirstPrivateSubnet"
+                },
+                "RouteTableId": {
+                    "Ref": "FirstPrivateRouteTable"
+                }
+            }
+        },
+        "FirstPublicSubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "Region"
+                                    },
+                                    "-",
+                                    {
+                                        "Ref": "AppName"
+                                    },
+                                    "-",
+                                    "FirstPublicSubnet",
+                                    "-",
+                                    {
+                                        "Ref": "Environs"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                },
+                "CidrBlock": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "10.",
+                            {
+                                "Ref": "SecondOctet"
+                            },
+                            ".0.0/18"
+                        ]
+                    ]
+                },
+                "MapPublicIpOnLaunch": true,
+                "AvailabilityZone": {
+                    "Ref": "AZ1"
+                }
+            }
+        },
+        "SecondNatGateway": {
+            "Type": "AWS::EC2::NatGateway",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "SecondPublicSubnet"
+                },
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "EIP2",
+                        "AllocationId"
+                    ]
+                }
+            }
+        },
         "SecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
@@ -243,6 +328,17 @@
                 ]
             }
         },
+        "SecondPrivateRDSSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "SecondPrivateRDSSubnet"
+                },
+                "RouteTableId": {
+                    "Ref": "SecondPrivateRouteTable"
+                }
+            }
+        },
         "SecondPrivateRouteTable": {
             "Type": "AWS::EC2::RouteTable",
             "Properties": {
@@ -309,18 +405,40 @@
                 ]
             }
         },
-        "SecondNatGateway": {
-            "Type": "AWS::EC2::NatGateway",
+        "FirstPublicSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
                 "SubnetId": {
-                    "Ref": "SecondPublicSubnet"
+                    "Ref": "FirstPublicSubnet"
                 },
-                "AllocationId": {
-                    "Fn::GetAtt": [
-                        "EIP2",
-                        "AllocationId"
-                    ]
+                "RouteTableId": {
+                    "Ref": "FirstPublicRouteTable"
                 }
+            }
+        },
+        "FirstPrivateRDSSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "FirstPrivateRDSSubnet"
+                },
+                "RouteTableId": {
+                    "Ref": "FirstPrivateRouteTable"
+                }
+            }
+        },
+        "SecurityGroupIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "SourceSecurityGroupId": {
+                    "Ref": "SecurityGroup"
+                },
+                "FromPort": "0",
+                "ToPort": "65535",
+                "GroupId": {
+                    "Ref": "SecurityGroup"
+                },
+                "IpProtocol": "-1"
             }
         },
         "VPCGatewayAttachment": {
@@ -477,52 +595,14 @@
                 }
             }
         },
-        "FirstPublicSubnet": {
-            "Type": "AWS::EC2::Subnet",
+        "SecondPublicSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                "",
-                                [
-                                    {
-                                        "Ref": "Region"
-                                    },
-                                    "-",
-                                    {
-                                        "Ref": "AppName"
-                                    },
-                                    "-",
-                                    "FirstPublicSubnet",
-                                    "-",
-                                    {
-                                        "Ref": "Environs"
-                                    }
-                                ]
-                            ]
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
+                "SubnetId": {
+                    "Ref": "SecondPublicSubnet"
                 },
-                "CidrBlock": {
-                    "Fn::Join": [
-                        "",
-                        [
-                            "10.",
-                            {
-                                "Ref": "SecondOctet"
-                            },
-                            ".0.0/18"
-                        ]
-                    ]
-                },
-                "MapPublicIpOnLaunch": true,
-                "AvailabilityZone": {
-                    "Ref": "AZ1"
+                "RouteTableId": {
+                    "Ref": "SecondPublicRouteTable"
                 }
             }
         },
@@ -748,20 +828,6 @@
                         "AllocationId"
                     ]
                 }
-            }
-        },
-        "SecurityGroupIngress": {
-            "Type": "AWS::EC2::SecurityGroupIngress",
-            "Properties": {
-                "SourceSecurityGroupId": {
-                    "Ref": "SecurityGroup"
-                },
-                "FromPort": "0",
-                "ToPort": "65535",
-                "GroupId": {
-                    "Ref": "SecurityGroup"
-                },
-                "IpProtocol": "-1"
             }
         }
     }

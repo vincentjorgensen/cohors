@@ -2,7 +2,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 base_dir=$DIR/..
-provision_dir=$base_dir/centariae
+provision_dir=$base_dir/centuriae
 cf_dir=$base_dir/cf
 
 cmd=${0##*/}

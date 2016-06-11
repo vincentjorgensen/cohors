@@ -130,9 +130,18 @@
                 }
             }
         },
-        "FirstPublicSubnet": {
-            "Type": "AWS::EC2::Subnet",
+        "EIP": {
+            "Type": "AWS::EC2::EIP",
             "Properties": {
+                "Domain": "vpc"
+            }
+        },
+        "SecondPrivateRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "Vpc"
+                },
                 "Tags": [
                     {
                         "Key": "Name",
@@ -148,7 +157,7 @@
                                         "Ref": "AppName"
                                     },
                                     "-",
-                                    "FirstPublicSubnet",
+                                    "SecondPrivateRouteTable",
                                     "-",
                                     {
                                         "Ref": "Environs"
@@ -157,40 +166,7 @@
                             ]
                         }
                     }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
-                },
-                "CidrBlock": {
-                    "Fn::Join": [
-                        "",
-                        [
-                            "10.",
-                            {
-                                "Ref": "SecondOctet"
-                            },
-                            ".0.0/18"
-                        ]
-                    ]
-                },
-                "MapPublicIpOnLaunch": true,
-                "AvailabilityZone": {
-                    "Ref": "AZ1"
-                }
-            }
-        },
-        "SecondNatGateway": {
-            "Type": "AWS::EC2::NatGateway",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "SecondPublicSubnet"
-                },
-                "AllocationId": {
-                    "Fn::GetAtt": [
-                        "EIP2",
-                        "AllocationId"
-                    ]
-                }
+                ]
             }
         },
         "SecurityGroup": {
@@ -339,37 +315,18 @@
                 }
             }
         },
-        "SecondPrivateRouteTable": {
-            "Type": "AWS::EC2::RouteTable",
+        "NatGateway": {
+            "Type": "AWS::EC2::NatGateway",
             "Properties": {
-                "VpcId": {
-                    "Ref": "Vpc"
+                "SubnetId": {
+                    "Ref": "SecondPublicSubnet"
                 },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                "",
-                                [
-                                    {
-                                        "Ref": "Region"
-                                    },
-                                    "-",
-                                    {
-                                        "Ref": "AppName"
-                                    },
-                                    "-",
-                                    "SecondPrivateRouteTable",
-                                    "-",
-                                    {
-                                        "Ref": "Environs"
-                                    }
-                                ]
-                            ]
-                        }
-                    }
-                ]
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "EIP",
+                        "AllocationId"
+                    ]
+                }
             }
         },
         "FirstPrivateRouteTable": {
@@ -427,18 +384,15 @@
                 }
             }
         },
-        "SecurityGroupIngress": {
-            "Type": "AWS::EC2::SecurityGroupIngress",
+        "SecondPublicSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
-                "SourceSecurityGroupId": {
-                    "Ref": "SecurityGroup"
+                "SubnetId": {
+                    "Ref": "SecondPublicSubnet"
                 },
-                "FromPort": "0",
-                "ToPort": "65535",
-                "GroupId": {
-                    "Ref": "SecurityGroup"
-                },
-                "IpProtocol": "-1"
+                "RouteTableId": {
+                    "Ref": "SecondPublicRouteTable"
+                }
             }
         },
         "VPCGatewayAttachment": {
@@ -539,7 +493,7 @@
             "Properties": {
                 "DestinationCidrBlock": "0.0.0.0/0",
                 "NatGatewayId": {
-                    "Ref": "SecondNatGateway"
+                    "Ref": "NatGateway"
                 },
                 "RouteTableId": {
                     "Ref": "SecondPrivateRouteTable"
@@ -595,33 +549,67 @@
                 }
             }
         },
-        "SecondPublicSubnetRouteTableAssociation": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "FirstPublicSubnet": {
+            "Type": "AWS::EC2::Subnet",
             "Properties": {
-                "SubnetId": {
-                    "Ref": "SecondPublicSubnet"
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "Region"
+                                    },
+                                    "-",
+                                    {
+                                        "Ref": "AppName"
+                                    },
+                                    "-",
+                                    "FirstPublicSubnet",
+                                    "-",
+                                    {
+                                        "Ref": "Environs"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
                 },
-                "RouteTableId": {
-                    "Ref": "SecondPublicRouteTable"
+                "CidrBlock": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "10.",
+                            {
+                                "Ref": "SecondOctet"
+                            },
+                            ".0.0/18"
+                        ]
+                    ]
+                },
+                "MapPublicIpOnLaunch": true,
+                "AvailabilityZone": {
+                    "Ref": "AZ1"
                 }
             }
         },
-        "FirstPrivateRoute": {
-            "Type": "AWS::EC2::Route",
+        "SecurityGroupIngress": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
             "Properties": {
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "NatGatewayId": {
-                    "Ref": "FirstNatGateway"
+                "SourceSecurityGroupId": {
+                    "Ref": "SecurityGroup"
                 },
-                "RouteTableId": {
-                    "Ref": "FirstPrivateRouteTable"
-                }
-            }
-        },
-        "EIP2": {
-            "Type": "AWS::EC2::EIP",
-            "Properties": {
-                "Domain": "vpc"
+                "FromPort": "0",
+                "ToPort": "65535",
+                "GroupId": {
+                    "Ref": "SecurityGroup"
+                },
+                "IpProtocol": "-1"
             }
         },
         "FirstPrivateSubnet": {
@@ -673,10 +661,16 @@
                 }
             }
         },
-        "EIP1": {
-            "Type": "AWS::EC2::EIP",
+        "FirstPrivateRoute": {
+            "Type": "AWS::EC2::Route",
             "Properties": {
-                "Domain": "vpc"
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "NatGatewayId": {
+                    "Ref": "NatGateway"
+                },
+                "RouteTableId": {
+                    "Ref": "FirstPrivateRouteTable"
+                }
             }
         },
         "FirstPublicRoute": {
@@ -813,20 +807,6 @@
                 "MapPublicIpOnLaunch": false,
                 "AvailabilityZone": {
                     "Ref": "AZ2"
-                }
-            }
-        },
-        "FirstNatGateway": {
-            "Type": "AWS::EC2::NatGateway",
-            "Properties": {
-                "SubnetId": {
-                    "Ref": "FirstPublicSubnet"
-                },
-                "AllocationId": {
-                    "Fn::GetAtt": [
-                        "EIP1",
-                        "AllocationId"
-                    ]
                 }
             }
         }

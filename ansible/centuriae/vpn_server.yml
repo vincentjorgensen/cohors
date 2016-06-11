@@ -2,9 +2,8 @@
 - hosts: localhost
   connection: local
   gather_facts: False
-#  vars_files:
-#    - {{ base_dir }}/group_vars/all
   vars:
+    instance_type: t2.medium
     release: xenial
     uregion: "{{ region | regex_replace('-', '_') }}"
   tasks:
@@ -22,8 +21,17 @@
 #      template_format: yaml
       template_parameters:
         AppName: "{{ stack }}"
-        AZ1: "{{ availability_zone[uregion].first }}"
-        AZ2: "{{ availability_zone[uregion].second }}"
+        CohorsSecurityGroup: "{{ stack_infra.stack_outputs.SecurityGroup }}"
         Environs: "{{ environs }}"
+        ExternalRouteTableId: "{{ stack_infra.stack_outputs.FirstPublicRoute Table }}"
+        KeyName: "{{ key_name[environs] }}"
+        ImageId: "{{ amis[release][uregion] }}"
+        InternalRouteTableId: "{{stack_infra.stack_outputs.FirstPrivateRouteTable }}"
+        InstanceType: "{{ instance_type }}"
+        KeyName: "{{ key_name[environs] }}"
+        PublicDnsZone: "{{ public_dns_zone }}"
+        PrivateDnsZone: "{{ public_dns_zone }}"
         Region: "{{ region }}"
-        SecondOctet: "{{ second_octet[environs][uregion].vpc }}"
+        SecondVpnOctet: "{{ second_octet[environs][uregion].vpn }}"
+        SubnetId: "{{ stack_infra.stack_outputs.FirstPublicSubnet }}"
+        VpcId: "{{ stack_infra.stack_outputs.Vpc }}"

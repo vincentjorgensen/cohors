@@ -310,7 +310,8 @@ Resources:
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: FirstNatGateway
+#        Ref: FirstNatGateway
+        Ref: NatGateway
       RouteTableId:
         Ref: FirstPrivateRouteTable
   SecondPrivateRoute:
@@ -318,7 +319,8 @@ Resources:
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId:
-        Ref: SecondNatGateway
+#        Ref: SecondNatGateway
+        Ref: NatGateway
       RouteTableId:
         Ref: SecondPrivateRouteTable
   FirstPublicRoute:
@@ -398,29 +400,43 @@ Resources:
             - Ref: AppName
             - '-'
             - Ref: Environs
-  EIP1:
+#  EIP1:
+#    Type: AWS::EC2::EIP
+#    Properties:
+#      Domain: vpc
+#  EIP2:
+#    Type: AWS::EC2::EIP
+#    Properties:
+#      Domain: vpc
+  EIP:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
-  EIP2:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-  FirstNatGateway:
+#  FirstNatGateway:
+#    Type: AWS::EC2::NatGateway
+#    Properties:
+#      AllocationId:
+#        Fn::GetAtt:
+#          - EIP1
+#          - AllocationId
+#      SubnetId:
+#        Ref: FirstPublicSubnet
+#  SecondNatGateway:
+#    Type: AWS::EC2::NatGateway
+#    Properties:
+#      AllocationId:
+#        Fn::GetAtt:
+#          - EIP2
+#          - AllocationId
+#      SubnetId:
+#        Ref: SecondPublicSubnet
+  NatGateway:
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId:
         Fn::GetAtt:
-          - EIP1
-          - AllocationId
-      SubnetId:
-        Ref: FirstPublicSubnet
-  SecondNatGateway:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId:
-        Fn::GetAtt:
-          - EIP2
+#          - EIP2
+          - EIP
           - AllocationId
       SubnetId:
         Ref: SecondPublicSubnet

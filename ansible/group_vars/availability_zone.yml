@@ -5,6 +5,3 @@ availability_zone:
   us_east_1:
     first:  us-east-1c
     second: us-east-1e
-
-  
-  

@@ -6,17 +6,18 @@
 #    - {{ base_dir }}/group_vars/all
   vars:
     release: xenial
+    stela_name: "{{ region }}-{{ stela }}-{{ environs }}"
     uregion: "{{ region | regex_replace('-', '_') }}"
   tasks:
-  - name: "Provision {{ region }}-{{ stack }}-{{ environs }}"
+  - name: "Provision {{ stela_name }}"
     cloudformation:
       region: "{{ region }}"
-      stack_name: "{{ region }}-{{ stack }}-{{ environs }}"
-      state: "{{stack_state }}"
-      template: "{{ base_dir }}/cf/{{ region }}-{{ stack }}-{{ environs }}.cftemplate"
+      stack_name: "{{ stela_name }}"
+      state: "{{stela_state }}"
+      template: "{{ base_dir }}/cf/{{ stela_name }}.cftemplate"
 #      template_format: yaml
       template_parameters:
-        AppName: "{{ stack }}"
+        AppName: "{{ stela }}"
         AZ1: "{{ availability_zone[uregion].first }}"
         AZ2: "{{ availability_zone[uregion].second }}"
         Environs: "{{ environs }}"

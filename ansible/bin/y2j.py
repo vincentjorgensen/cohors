@@ -9,6 +9,6 @@ def date_handler(obj):
 
  
 data = yaml.load(sys.stdin)
-json = json.dumps(data, default=date_handler, indent=4, separators=(',', ': '))
+json = json.dump(data, default=date_handler, indent=4, separators=(',', ': '))
  
 print(json)

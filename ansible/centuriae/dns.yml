@@ -9,9 +9,9 @@
     cloudformation:
       region: "{{ region }}"
       stack_name: "{{ stela_name }}"
-      state: "{{stack_state }}"
-      template: "{{ base_dir }}/cf/{{ stela_name }}.cftemplate"
-#      template_format: yaml
+      state: "{{ stela_state }}"
+      template: "{{ base_dir }}/stelae/{{ stela_name }}.yml"
+      template_format: yaml
       template_parameters:
         Organization: "{{ organization }}"
         PublicDnsZone: "{{ public_dns_zone }}"

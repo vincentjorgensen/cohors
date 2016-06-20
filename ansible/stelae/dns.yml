@@ -1,0 +1,35 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Cohors Infrastructure
+Parameters:
+  Organization:
+    Type: String
+  PublicDnsZone:
+    Type: String
+  PrivateDnsZone:
+    Type: String
+Resources:
+  PublicHostedDns:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      HostedZoneConfig:
+        Comment:
+          Fn::Join:
+          - ''
+          - - Public Domain for
+            - ' '
+            - Ref: Organization
+      Name:
+        Ref: PublicDnsZone
+  PrivateHostedDns:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      HostedZoneConfig:
+        Comment:
+          Fn::Join:
+          - ''
+          - - Private Domain for
+            - ' '
+            - Ref: Organization
+      Name:
+        Ref: PrivateDnsZone

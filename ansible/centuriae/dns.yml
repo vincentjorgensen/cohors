@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    stela_name: "dns"
+  tasks:
+  - name: "Provision {{ stela_name }}"
+    cloudformation:
+      region: "{{ region }}"
+      stack_name: "{{ stela_name }}"
+      state: "{{stack_state }}"
+      template: "{{ base_dir }}/cf/{{ stela_name }}.cftemplate"
+#      template_format: yaml
+      template_parameters:
+        Organization: "{{ organization }}"
+        PublicDnsZone: "{{ public_dns_zone }}"
+        PrivateDnsZone: "{{ private_dns_zone }}"

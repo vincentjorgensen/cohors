@@ -1,3 +1,6 @@
+## Library Directory
+Renamed to Latin Libarium to maintain thematic consistency.
+
 ### Cloudformation Stack Facts
 Please get cloudformation_stack_facts from Dean Wilson's github repository
 [https://github.com/deanwilson/ansible-plugins/blob/master/library/cloudformation_stack_facts]

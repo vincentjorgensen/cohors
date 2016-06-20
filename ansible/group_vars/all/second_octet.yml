@@ -1,5 +1,5 @@
 ---
-second_octets:
+second_octet:
   prod:
     us_west_2:
       vpc: 0     # 10.0.0.0/16
@@ -13,22 +13,22 @@ second_octets:
     eu_west_1:
       vpc: 12    # 10.12.0.0/16
       vpn: 13    # 10.13.0.0/16
-  eu_central_1:
+    eu_central_1:
       vpc: 16    # 10.16.0.0/16
       vpn: 17    # 10.17.0.0/16
-  ap_southeast_1:
+    ap_southeast_1:
       vpc: 20    # 10.20.0.0/16
       vpn: 21    # 10.21.0.0/16
-  ap_southeast_2:
+    ap_southeast_2:
       vpc: 24    # 10.24.0.0/16
       vpn: 25    # 10.25.0.0/16
-  ap_northeast_1:
+    ap_northeast_1:
       vpc: 28    # 10.28.0.0/16
       vpn: 29    # 10.29.0.0/16
-  ap_northeast_2:
+    ap_northeast_2:
       vpc: 32    # 10.32.0.0/16
       vpn: 33    # 10.33.0.0/16
-  sa_east_1:
+    sa_east_1:
       vpc: 36    # 10.36.0.0/16
       vpn: 37    # 10.37.0.0/16
   dev:

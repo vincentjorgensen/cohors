@@ -1,5 +1,5 @@
 ---
-amis:
+ami:
   xenial:
     us_west_2:  ami-d06a90b0 
     us_west_1:  ami-08490c68 

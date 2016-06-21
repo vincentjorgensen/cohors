@@ -2,32 +2,66 @@
 Description: OpenVPN Server
 Parameters:
   AppName:
+    Description: Cohors application name
     Type: String
   PublicDnsZone:
-    Type: String
-  PrivateDnsZone:
+    Description: Public-facing DNS Zone
     Type: String
   CohorsSecurityGroup:
-    Type: SecurityGroup
+    Description: VPC security group
+    Type: AWS::EC2::SecurityGroup::Id
   Environs:
+    Description: Prod or Dev (non-production)
     Type: String
+    Default: dev
+    AllowedValues:
+    - prod
+    - dev
   ExternalRouteTableId:
-    Type: AWS::EC2::RouteTable
+    Description: Public route table
+    Type: AWS::EC2::RouteTable::Id
   ImageId:
-    Type: String
+    Description: EC2 image id
+    Type: AWS::EC2::Image::Id
   InstanceType:
+    Description: EC2 instance type
     Type: String
+    Default: t2.small
+    AllowedValues:
+    - t2.nano
+    - t2.micro
+    - t2.small
+    - t2.medium
+    - t2.large
   InternalRouteTableId:
-    Type: AWS::EC2::RouteTable
+    Description: Private route table
+    Type: AWS::EC2::RouteTable::Id
   KeyName:
+    Description: Existing EC2 KeyPair for SSH
     Type: AWS::EC2::KeyPair::KeyName
   Region:
+    Description: AWS EC2 Region
     Type: String
+    Default: us-west-2
+    AllowedValues:
+    - us-west-1
+    - us-west-2
+    - us-east-1
+    - eu-west-1
+    - eu-central-1
+    - ap-southeast-1
+    - ap-southeast-2
+    - ap-northeast-1
+    - ap-northeast-2
+    - sa-east-1
   SecondVpnOctet:
+    Description: Second Octet
     Type: String
   SubnetId:
+    Description: EC2 subnet id for VPN server
     Type: AWS::EC2::Subnet::Id
   VpcId:
+    Description: VPC Id for Cohors column
     Type: AWS::EC2::VPC::Id
 Resources:
   VpnInstance:
@@ -59,14 +93,16 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneName:
-        Ref: DnsZone
+        Ref: PublicDnsZone
       Name:
         Fn::Join:
         - ''
-        - - Ref: VpcName
+        - - Ref: Region
+          - '-'
+          - Ref: Environs
           - -vpn
           - "."
-          - Ref: DnsZone
+          - Ref: PublicDnsZone
       ResourceRecords:
       - Ref: ElasticIp
       TTL: 300

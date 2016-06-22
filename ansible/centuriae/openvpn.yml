@@ -17,21 +17,27 @@
     cloudformation:
       region: "{{ region }}"
       stack_name: "{{ stela_name }}"
-      state: "{{stack_state }}"
-      template: "{{ base_dir }}/cf/{{ stela_name }}.cftemplate"
-#      template_format: yaml
+      state: "{{ stela_state }}"
+      template: "{{ base_dir }}/stelae/{{ stela }}.yml"
+      template_format: yaml
       template_parameters:
         AppName: "{{ stela }}"
         CohorsSecurityGroup: "{{ stela_infra.stack_outputs.SecurityGroup }}"
         Environs: "{{ environs }}"
-        ExternalRouteTableId: "{{ stela_infra.stack_outputs.FirstPublicRoute Table }}"
-        KeyName: "{{ key_name[environs][uregion] }}"
-        ImageId: "{{ amis[release][uregion] }}"
+        ExternalRouteTableId: "{{ stela_infra.stack_outputs.FirstPublicRouteTable }}"
+        KeyName: "{{ key[environs][uregion] }}"
+        ImageId: "{{ ami[release][uregion] }}"
         InternalRouteTableId: "{{stela_infra.stack_outputs.FirstPrivateRouteTable }}"
         InstanceType: "{{ instance_type }}"
         PublicDnsZone: "{{ public_dns_zone }}"
-        PrivateDnsZone: "{{ public_dns_zone }}"
         Region: "{{ region }}"
         SecondVpnOctet: "{{ second_octet[environs][uregion].vpn }}"
         SubnetId: "{{ stela_infra.stack_outputs.FirstPublicSubnet }}"
         VpcId: "{{ stela_infra.stack_outputs.Vpc }}"
+- hosts: vpn_servers
+  connection: localhost
+  gather_facts: True
+  roles:
+    - base
+    - openvpn
+

@@ -5,28 +5,29 @@ Parameters:
     Description: Cohors application name
     Type: String
   PublicDnsZone:
+    Default: example.com
     Description: Public-facing DNS Zone
     Type: String
   CohorsSecurityGroup:
     Description: VPC security group
     Type: AWS::EC2::SecurityGroup::Id
   Environs:
+    Default: dev
     Description: Prod or Dev (non-production)
     Type: String
-    Default: dev
     AllowedValues:
     - prod
     - dev
   ExternalRouteTableId:
     Description: Public route table
-    Type: AWS::EC2::RouteTable::Id
+    Type: String
   ImageId:
     Description: EC2 image id
     Type: AWS::EC2::Image::Id
   InstanceType:
+    Default: t2.small
     Description: EC2 instance type
     Type: String
-    Default: t2.small
     AllowedValues:
     - t2.nano
     - t2.micro
@@ -35,14 +36,14 @@ Parameters:
     - t2.large
   InternalRouteTableId:
     Description: Private route table
-    Type: AWS::EC2::RouteTable::Id
+    Type: String
   KeyName:
     Description: Existing EC2 KeyPair for SSH
     Type: AWS::EC2::KeyPair::KeyName
   Region:
+    Default: us-west-2
     Description: AWS EC2 Region
     Type: String
-    Default: us-west-2
     AllowedValues:
     - us-west-1
     - us-west-2
@@ -55,8 +56,11 @@ Parameters:
     - ap-northeast-2
     - sa-east-1
   SecondVpnOctet:
-    Description: Second Octet
-    Type: String
+    Default: 0
+    Description: Second Octet (0-255) in 10.X.0.0/16
+    MaxValue: 255
+    MinValue: 0
+    Type: Number
   SubnetId:
     Description: EC2 subnet id for VPN server
     Type: AWS::EC2::Subnet::Id
@@ -83,6 +87,16 @@ Resources:
       - Key: Name
         Value:
           Ref: AWS::StackName
+      - Key: ubuntu
+        Value: True
+      - Key: openvpn
+        Value: True
+      - Key:
+          Ref: Environs
+        Value: True
+      - Key:
+          Ref: Region
+        Value: True
   ElasticIp:
     Type: AWS::EC2::EIP
     Properties:

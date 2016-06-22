@@ -6,6 +6,7 @@ provision_dir=$base_dir/centuriae
 stela_dir=$base_dir/stelae
 cf_dir=$base_dir/cf
 bin_dir=$base_dir/bin
+inventory=$base_dir/inventory/ec2.py
 
 cmd=${0##*/}
 
@@ -71,7 +72,7 @@ ch_file=$stela_dir/$stela.yml
 cf_file=$cf_dir/$region-$stela-$environs.cftemplate
 $bin_dir/y2j.py < $ch_file > $cf_file
 
-ansible-playbook -vvvvv -i $base_dir/hosts \
+ansible-playbook -vvv -i $inventory \
     --extra-vars "stela=$stela region=$region environs=$environs base_dir=$base_dir stela_state=$stela_state" \
     $playbook $*
 

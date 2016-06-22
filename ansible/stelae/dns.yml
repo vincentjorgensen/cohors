@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Cohors Infrastructure
+Description: Cohors DNS
 Parameters:
   Organization:
     Type: String

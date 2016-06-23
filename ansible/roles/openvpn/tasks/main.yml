@@ -51,13 +51,13 @@
 - name: "OpenVPN: Enable IPv4 Forwarding Reload /etc/sysctl.conf"
   command:  sysctl -p
 
-# iptables -t nat -A POSTROUTING -s 10.9.0.0/24 -o eth0 -j MASQUERADE
+# iptables -t nat -A POSTROUTING -s 10.X.0.0/16 -o eth0 -j MASQUERADE
 - name: "OpenVPN: Enable NAT IP Masquerading"
   become: yes
   iptables: >
     table=nat
     chain=POSTROUTING
-    source=10.9.0.0/24
+    source=10.{{ second_octet[environs][uregion].vpn }}.0.0/16
     out_interface=eth0
     jump=MASQUERADE
 

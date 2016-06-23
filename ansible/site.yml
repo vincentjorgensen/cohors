@@ -1,1 +1,3 @@
+- include: sites/consul_servers.yml
+- include: sites/ubuntu_servers.yml
 - include: sites/vpn_servers.yml

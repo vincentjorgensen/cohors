@@ -1,0 +1,12 @@
+---
+- hosts: consul_servers
+  gather_facts: True
+  vars:
+    consul_version: "0.6.4"
+    consul_is_server: "true"
+    consul_datacenter: "{{ region }}-{{ environs }}"
+    consul_dns_config: true
+    consul_bootstrap: "true"
+    consul_bind_address: "{{ ansible_default_ipv4['address'] }}"
+  roles:
+    - { role: ansible-consul }

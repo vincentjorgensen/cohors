@@ -2,19 +2,35 @@
 # I need to tell Ansible which Python on my system has boto for AWS
 127.0.0.1 ansible_python_interpreter=/usr/local/bin/python
 
-[tag_region_us_west_2]
-[tag_role_openvpn]
+# Dynamic Inventory EC2 Tags
 [tag_environs_dev]
 [tag_linux_ubuntu]
+[tag_region_us_east_1]
+[tag_region_us_west_2]
+[tag_role_consul]
+[tag_role_openvpn]
+[tag_role_jenkins]
 
+# Map EC2 tags to Server Groups
 [dev:children]
 tag_environs_dev
+
+[consul_servers:children]
+tag_role_consul
+
+[jenkins_servers:children]
+tag_role_jenkins
 
 [vpn_servers:children]
 tag_role_openvpn
 
-[us_west_2:children]
+[ubuntu_servers:children]
+tag_linux_ubuntu
+
+[us_east_1_servers:children]
+tag_region_us_east_1
+
+[us_west_2_servers:children]
 tag_region_us_west_2
 
-[ubuntu:children]
-tag_linux_ubuntu
+# End

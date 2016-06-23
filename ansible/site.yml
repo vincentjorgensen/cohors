@@ -1,1 +1,1 @@
-- include: sites/openvpn.yml
+- include: sites/vpn_servers.yml

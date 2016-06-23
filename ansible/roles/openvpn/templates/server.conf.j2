@@ -1,0 +1,10 @@
+ca /etc/openvpn/pki/ca.crt
+cert /etc/openvpn/pki/issued/server.crt
+key /etc/openvpn/pki/private/server.key  # This file should be kept secret
+dh /etc/openvpn/pki/dh.pem
+
+server 10.{{ second_octet[environs][uregion].vpn }}.0.0 255.255.0.0
+ifconfig-pool-persist /etc/openvpn/ipp.txt
+
+push "route 10.{{ second_octet[environs][uregion].vpc }}.0.0 255.255.0.0"
+

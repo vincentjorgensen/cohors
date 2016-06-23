@@ -6,7 +6,8 @@ provision_dir=$base_dir/centuriae
 stela_dir=$base_dir/stelae
 cf_dir=$base_dir/cf
 bin_dir=$base_dir/bin
-inventory=$base_dir/inventory/ec2.py
+inventory=$base_dir/inventarium
+site_file=$base_dir/site.yml
 
 cmd=${0##*/}
 
@@ -28,11 +29,13 @@ EOF
 region=us-west-2
 environs=dev
 stela_state=present
+provision=false
 [[ -n $CH_REGION ]]     && region=$CH_REGION
 [[ -n $CH_ENVIRONS ]]   && environs=$CH_ENVIRONS
 [[ -n $CH_STATE ]]      && stela_state=$CH_ENVIRONS
-[[ $cmd = procedite ]]  && stela_state=present
-[[ $cmd = consistite ]] && stela_state=absent
+[[ $cmd = procedite ]]  && stela_state=present && provision=true
+[[ $cmd = discedite ]]  && stela_state=absent && provision=true
+[[ $cmd = adsigna ]]    && provision=false
 stela=$1
 [[ -z $2 ]] && shift
 
@@ -61,19 +64,26 @@ while getopts ":s:r:e:cd" opt; do
 done
 shift $((OPTIND-1))
 
-playbook=$provision_dir/$stela.yml
+playbook=$site_file
+extra_vars="region=$region environs=$environs base_dir=$base_dir"
+limits="-l $stela"
+if $provision; then
+    playbook=$provision_dir/$stela.yml
+    extra_vars="stela=$stela region=$region environs=$environs base_dir=$base_dir stela_state=$stela_state"
+    limits=''
+fi
 
 [[ -z $region ]] && usage
 [[ -z $stela ]] && usage
 [[ -z $environs ]] && usage
 [[ ! -e $playbook ]] && echo "$playbook must exist" && exit 1
 
-ch_file=$stela_dir/$stela.yml
-cf_file=$cf_dir/$region-$stela-$environs.cftemplate
-$bin_dir/y2j.py < $ch_file > $cf_file
+#ch_file=$stela_dir/$stela.yml
+#cf_file=$cf_dir/$region-$stela-$environs.cftemplate
+#$bin_dir/y2j.py < $ch_file > $cf_file
 
 ansible-playbook -vvv -i $inventory \
-    --extra-vars "stela=$stela region=$region environs=$environs base_dir=$base_dir stela_state=$stela_state" \
-    $playbook $*
+    --extra-vars "$extra_vars" \
+    $playbook $limits $*
 
 # End

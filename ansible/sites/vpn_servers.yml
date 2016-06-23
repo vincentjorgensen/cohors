@@ -1,0 +1,8 @@
+---
+- hosts: vpn_servers
+  become: True
+  gather_facts: True
+  roles:
+    - { role: common }
+    - { role: openvpn }
+

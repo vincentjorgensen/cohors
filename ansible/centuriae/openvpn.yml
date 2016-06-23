@@ -34,10 +34,4 @@
         SecondVpnOctet: "{{ second_octet[environs][uregion].vpn }}"
         SubnetId: "{{ stela_infra.stack_outputs.FirstPublicSubnet }}"
         VpcId: "{{ stela_infra.stack_outputs.Vpc }}"
-- hosts: vpn_servers
-  connection: localhost
-  gather_facts: True
-  roles:
-    - base
-    - openvpn
 

@@ -1,0 +1,4 @@
+---
+openvpn_version: "2.3.9" 
+
+openvpn_server_conf_template: "server.conf.j2"

@@ -1,0 +1,20 @@
+[localhost]
+# I need to tell Ansible which Python on my system has boto for AWS
+127.0.0.1 ansible_python_interpreter=/usr/local/bin/python
+
+[tag_region_us_west_2]
+[tag_role_openvpn]
+[tag_environs_dev]
+[tag_linux_ubuntu]
+
+[dev:children]
+tag_environs_dev
+
+[vpn_servers:children]
+tag_role_openvpn
+
+[us_west_2:children]
+tag_region_us_west_2
+
+[ubuntu:children]
+tag_linux_ubuntu

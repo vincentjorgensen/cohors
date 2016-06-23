@@ -17,11 +17,29 @@
     url=http://swupdate.openvpn.org/community/releases/openvpn-{{ openvpn_version }}.tar.gz
     dest=/usr/local/src/openvpn-{{ openvpn_version }}.tar.gz
 
-- name: "OpenVPN: Extract and install OpenVPN"
-  become: yes
+- name: "OpenVPN: Extract" 
   unarchive: src=/usr/local/src/openvpn-{{ openvpn_version }}.tar.gz
-    dest=/usr/local/bin
+    dest=/tmp
     copy=no
+
+- name: "OpenVPN: Configure OpenVPN"
+  command: ./configure
+  args:
+    chdir: /tmp/openvpn-{{ openvpn_version }}
+    creates: /tmp/openvpn-{{ openvpn_version }}/Makefile
+
+- name: "OpenVPN: make"
+  command: make
+  args:
+    chdir: /tmp/openvpn-{{ openvpn_version }}
+    creates: /tmp/openvpn-{{ openvpn_version }}/src/openvpn/openvpn
+
+- name: "OpenVPN: make"
+  become: yes
+  command: make install
+  args:
+    chdir: /tmp/openvpn-{{ openvpn_version }}
+    creates: /usr/local/sbin/openvpn
 
 - name: "OpenVPN: Enable IPv4 Forwarding: /etc/sysctl.conf"
   become: yes
@@ -85,7 +103,7 @@
 - name: "OpenVPN: /etc/openvpn/pki/private/server.key (SECRET)"
   become: yes
   copy: >
-    src="{{ lookup('file', '../files/server.key') }}"
+    src=../files/server.key.vault
     dest=/etc/openvpn/pki/private/server.key
     mode=0600
 
@@ -98,5 +116,5 @@
 
 - name: "OpenVPN: Start daemon"
   become: yes
-  shell: daemon -- /usr/local/bin/openvpn --daemon --config /etc/openvpn/server.conf
+  shell: nohup /usr/local/sbin/openvpn --daemon --dev tun --config /etc/openvpn/server.conf
 

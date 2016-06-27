@@ -1,0 +1,32 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    instance_type: t2.large
+    release: xenial
+    stela_name: "{{ region }}-{{ stela }}-{{ environs }}"
+    uregion: "{{ region | regex_replace('-', '_') }}"
+  tasks:
+  - name: "Stack facts for {{ region }}-infra-{{ environs }}"
+    cloudformation_stack_facts:
+      stack_name: "{{ region }}-infra-{{ environs }}"
+      region: "{{ region }}"
+    register: stela_infra
+  - name: "Provision {{ stela_name }}"
+    cloudformation:
+      region: "{{ region }}"
+      stack_name: "{{ stela_name }}"
+      state: "{{ stela_state }}"
+      template: "{{ base_dir }}/stelae/{{ stela }}.yml"
+      template_format: yaml
+      template_parameters:
+        AppName: "{{ stela }}"
+        CohorsSecurityGroup: "{{ stela_infra.stack_outputs.SecurityGroup }}"
+        Environs: "{{ environs }}"
+        KeyName: "{{ key[environs][uregion] }}"
+        ImageId: "{{ ami[release][uregion] }}"
+        InstanceType: "{{ instance_type }}"
+        PrivateDnsZone: "{{ private_dns_zone }}"
+        Region: "{{ region }}"
+        SubnetId: "{{ stela_infra.stack_outputs.SecondPrivateSubnet }}"

@@ -2,11 +2,9 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 base_dir=$DIR/..
-provision_dir=$base_dir/centuriae
-stela_dir=$base_dir/stelae
-cf_dir=$base_dir/cf
+century_dir=$base_dir/centuries
+stack_dir=$base_dir/cf_stacks
 bin_dir=$base_dir/bin
-inventory=$base_dir/inventarium
 site_file=$base_dir/site.yml
 
 cmd=${0##*/}
@@ -14,47 +12,64 @@ cmd=${0##*/}
 function usage {
     cat <<EOF
 Usage:
-`readlink $0` [-c|-d] [-s <stela>] [-r <region>] [-e <environs>] 
+`readlink $0` [-c|-d] [-i|-p] [-s <stack>] [-r <region>] [-e <environs>] [-l <core|edge>]
     or
 export CH_REGION=us-west-2
 export CH_ENVIRONS=dev
+export CH_SPOKE=core
 export CH_STATE=present    # absent or -d to remove
-`readlink $0` [stela]
+`readlink $0` [stack]
 
 The flags will override the environment variables
+procedite: Alias for `readlink $0` -c (implies -p)
+discedite: Alias for `readlink $0` -d (implies -p)
+adsigna: Alias for `readlink $0` -o
+
+ -i : Instantiate (CloudFormation)
+ -p : Provision (playbooks and roles)
 EOF
     exit
 }
 
 region=us-west-2
 environs=dev
-stela_state=present
-provision=false
+stack_state=present
+instantiate=false
+spoke=core
 [[ -n $CH_REGION ]]     && region=$CH_REGION
 [[ -n $CH_ENVIRONS ]]   && environs=$CH_ENVIRONS
-[[ -n $CH_STATE ]]      && stela_state=$CH_ENVIRONS
-[[ $cmd = procedite ]]  && stela_state=present && provision=true
-[[ $cmd = discedite ]]  && stela_state=absent && provision=true
-[[ $cmd = adsigna ]]    && provision=false
-stela=$1
+[[ -n $CH_STATE ]]      && stack_state=$CH_ENVIRONS
+[[ $cmd = procedite ]]  && stack_state=present && instantiate=true
+[[ $cmd = discedite ]]  && stack_state=absent && instantiate=true
+[[ $cmd = adsigna ]]    && instantiate=false
+stack=$1
 [[ -z $2 ]] && shift
 
-while getopts ":s:r:e:cd" opt; do
+while getopts ":s:r:e:l:cdop" opt; do
     case $opt in
         c)
-            stela_state=present
+            stack_state=present
             ;;
         d)
-            stela_state=absent
+            stack_state=absent
             ;;
         s)
-            stela=$OPTARG
+            stack=$OPTARG
             ;;
         r)
             region=$OPTARG
             ;;
         e)
             environs=$OPTARG
+            ;;
+        l)
+            spoke=$OPTARG
+            ;;
+        p)
+            instantiate=false
+            ;;
+        i)
+            instantiate=true
             ;;
         :)
             echo "Option -$OPTARG requires an argument."
@@ -65,22 +80,19 @@ done
 shift $((OPTIND-1))
 
 playbook=$site_file
-extra_vars="region=$region environs=$environs base_dir=$base_dir"
-limits="-l $stela"
-if $provision; then
-    playbook=$provision_dir/$stela.yml
-    extra_vars="stela=$stela region=$region environs=$environs base_dir=$base_dir stela_state=$stela_state"
+extra_vars="region=$region environs=$environs base_dir=$base_dir spoke=$spoke"
+limits="-l $stack"
+if $instantiate; then
+    playbook=$stack_dir/$stack.yml
+    extra_vars="stack=$stack region=$region environs=$environs base_dir=$base_dir stack_state=$stack_state spoke=$spoke"
     limits=''
 fi
 
 [[ -z $region ]] && usage
-[[ -z $stela ]] && usage
+[[ -z $stack ]] && usage
 [[ -z $environs ]] && usage
+[[ -z $spoke ]] && usage
 [[ ! -e $playbook ]] && echo "$playbook must exist" && exit 1
-
-#ch_file=$stela_dir/$stela.yml
-#cf_file=$cf_dir/$region-$stela-$environs.cftemplate
-#$bin_dir/y2j.py < $ch_file > $cf_file
 
 ansible-playbook -vvv -i $inventory \
     --extra-vars "$extra_vars" \

@@ -1,3 +1,6 @@
 [submodule "ansible/roles/ansible-consul"]
 	path = ansible/roles/ansible-consul
 	url = https://github.com/savagegus/ansible-consul.git
+[submodule "ansible/roles/ansible-role-jenkins"]
+	path = ansible/roles/ansible-role-jenkins
+	url = git@github.com:geerlingguy/ansible-role-jenkins.git

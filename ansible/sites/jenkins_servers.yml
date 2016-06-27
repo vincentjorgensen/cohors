@@ -1,0 +1,8 @@
+---
+- hosts: jenkins_servers
+  become: True
+  gather_facts: True
+  vars:
+    jenkins_hostname: "{{ region }}-{{ environs }}-jenkins.{{ private_dns_zone }}"
+  roles:
+    - { role: geerlingguy.jenkins }

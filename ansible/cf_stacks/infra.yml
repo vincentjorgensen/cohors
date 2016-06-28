@@ -3,19 +3,51 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Cohors Infrastructure
 Parameters:
   AppName:
+    AllowedPattern: [ueas][supa]-[a-z]+-\d[a-z]
+    Description: Cohors application name
     Type: String
   AZ1:
+    Description: First (of two) availability zone for column
     Type: String
   AZ2:
+    AllowedPattern: [ueas][supa]-[a-z]+-\d[a-z]
+    Description: Second (of two) availability zone for column
     Type: String
   Environs:
+    Default: dev
+    Description: Prod or Dev (non-production)
     Type: String
+    AllowedValues:
+    - prod
+    - dev
   Region:
+    Default: us-west-2
+    Description: AWS EC2 Region
     Type: String
+    AllowedValues:
+    - us-west-1
+    - us-west-2
+    - us-east-1
+    - eu-west-1
+    - eu-central-1
+    - ap-southeast-1
+    - ap-southeast-2
+    - ap-northeast-1
+    - ap-northeast-2
+    - sa-east-1
   SecondOctet:
-    Type: String
+    Default: 0
+    Description: VPC Second Octet (0-255) in 10.X.0.0/16
+    MaxValue: 255
+    MinValue: 0
+    Type: Number
   Spoke:
+    Default: core
+    Description: Core or Edge
     Type: String
+    AllowedValues:
+    - core
+    - edge
 Resources:
   FirstPrivateSubnet:
     Type: AWS::EC2::Subnet

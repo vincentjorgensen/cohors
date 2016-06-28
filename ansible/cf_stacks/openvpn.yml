@@ -57,10 +57,17 @@ Parameters:
     - sa-east-1
   SecondVpnOctet:
     Default: 0
-    Description: Second Octet (0-255) in 10.X.0.0/16
+    Description: VPN Second Octet (0-255) in 10.X.0.0/16
     MaxValue: 255
     MinValue: 0
     Type: Number
+  Spoke:
+    Default: core
+    Description: Core or Edge
+    Type: String
+    AllowedValues:
+    - core
+    - edge
   SubnetId:
     Description: EC2 subnet id for VPN server
     Type: AWS::EC2::Subnet::Id

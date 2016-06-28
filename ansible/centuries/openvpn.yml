@@ -5,33 +5,34 @@
   vars:
     instance_type: t2.medium
     release: xenial
-    stela_name: "{{ region }}-{{ stela }}-{{ environs }}"
+    stack_name: "{{ region }}-{{ stack }}-{{ environs }}-{{ spoke }}"
     uregion: "{{ region | regex_replace('-', '_') }}"
   tasks:
   - name: "Stack facts for {{ region }}-infra-{{ environs }}"
     cloudformation_stack_facts:
       stack_name: "{{ region }}-infra-{{ environs }}"
       region: "{{ region }}"
-    register: stela_infra
-  - name: "Provision {{ stela_name }}"
+    register: stack_infra
+  - name: "Provision {{ stack_name }}"
     cloudformation:
       region: "{{ region }}"
-      stack_name: "{{ stela_name }}"
-      state: "{{ stela_state }}"
-      template: "{{ base_dir }}/stelae/{{ stela }}.yml"
+      stack_name: "{{ stack_name }}"
+      state: "{{ stack_state }}"
+      template: "{{ base_dir }}/cf_stack/{{ stack }}.yml"
       template_format: yaml
       template_parameters:
-        AppName: "{{ stela }}"
-        CohorsSecurityGroup: "{{ stela_infra.stack_outputs.SecurityGroup }}"
+        AppName: "{{ stack }}"
+        CohorsSecurityGroup: "{{ stack_infra.stack_outputs.SecurityGroup }}"
         Environs: "{{ environs }}"
-        ExternalRouteTableId: "{{ stela_infra.stack_outputs.FirstPublicRouteTable }}"
+        ExternalRouteTableId: "{{ stack_infra.stack_outputs.FirstPublicRouteTable }}"
         KeyName: "{{ key[environs][uregion] }}"
         ImageId: "{{ ami[release][uregion] }}"
-        InternalRouteTableId: "{{stela_infra.stack_outputs.FirstPrivateRouteTable }}"
+        InternalRouteTableId: "{{stack_infra.stack_outputs.FirstPrivateRouteTable }}"
         InstanceType: "{{ instance_type }}"
         PublicDnsZone: "{{ public_dns_zone }}"
         Region: "{{ region }}"
         SecondVpnOctet: "{{ second_octet[environs][uregion].vpn }}"
-        SubnetId: "{{ stela_infra.stack_outputs.FirstPublicSubnet }}"
-        VpcId: "{{ stela_infra.stack_outputs.Vpc }}"
+        Spoke: "{{ spoke }}"
+        SubnetId: "{{ stack_infra.stack_outputs.FirstPublicSubnet }}"
+        VpcId: "{{ stack_infra.stack_outputs.Vpc }}"
 

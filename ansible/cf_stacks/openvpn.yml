@@ -2,11 +2,11 @@
 Description: OpenVPN Server
 Parameters:
   AppName:
-    AllowedPattern: \w+
+    AllowedPattern: '\w+'
     Description: Cohors application name
     Type: String
   PublicDnsZone:
-    AllowedPattern: \w+\.\w
+    AllowedPattern: '\w+\.\w'
     Default: example.com
     Description: Public-facing DNS Zone
     Type: String
@@ -21,7 +21,7 @@ Parameters:
     - prod
     - dev
   ExternalRouteTableId:
-    AllowedPattern: rtb-*
+    AllowedPattern: 'rtb-*'
     Description: Public route table
     Type: String
   ImageId:
@@ -38,7 +38,7 @@ Parameters:
     - t2.medium
     - t2.large
   InternalRouteTableId:
-    AllowedPattern: rtb-*
+    AllowedPattern: 'rtb-*'
     Description: Private route table
     Type: String
   KeyName:

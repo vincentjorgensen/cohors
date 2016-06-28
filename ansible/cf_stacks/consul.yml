@@ -2,9 +2,11 @@
 Description: Consul Server
 Parameters:
   AppName:
+    AllowedPattern: '\w+'
     Description: Cohors application name
     Type: String
   PrivateDnsZone:
+    AllowedPattern: '\w+\.\w'
     Default: example.net
     Description: Private-facing DNS Zone
     Type: String
@@ -49,6 +51,13 @@ Parameters:
     - ap-northeast-1
     - ap-northeast-2
     - sa-east-1
+  Spoke:
+    Default: core
+    Description: Core or Edge
+    Type: String
+    AllowedValues:
+    - core
+    - edge
   SubnetId:
     Description: EC2 subnet id
     Type: AWS::EC2::Subnet::Id

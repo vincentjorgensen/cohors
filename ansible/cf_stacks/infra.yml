@@ -3,10 +3,11 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Cohors Infrastructure
 Parameters:
   AppName:
-    AllowedPattern: [ueas][supa]-[a-z]+-\d[a-z]
+    AllowedPattern: \w+
     Description: Cohors application name
     Type: String
   AZ1:
+    AllowedPattern: [ueas][supa]-[a-z]+-\d[a-z]
     Description: First (of two) availability zone for column
     Type: String
   AZ2:

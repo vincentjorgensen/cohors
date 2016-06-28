@@ -5,6 +5,7 @@ base_dir=$DIR/..
 century_dir=$base_dir/centuries
 stack_dir=$base_dir/cf_stacks
 bin_dir=$base_dir/bin
+inventory=$base_dir/inventory
 site_file=$base_dir/site.yml
 
 cmd=${0##*/}
@@ -83,7 +84,7 @@ playbook=$site_file
 extra_vars="region=$region environs=$environs base_dir=$base_dir spoke=$spoke"
 limits="-l $stack"
 if $instantiate; then
-    playbook=$stack_dir/$stack.yml
+    playbook=$century_dir/$stack.yml
     extra_vars="stack=$stack region=$region environs=$environs base_dir=$base_dir stack_state=$stack_state spoke=$spoke"
     limits=''
 fi

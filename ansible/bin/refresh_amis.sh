@@ -8,7 +8,7 @@ xenial=xenial-16.04
 
 cat <<EOF
 ---
-amis:
+ami:
 EOF
 
 function aws_describe_images {

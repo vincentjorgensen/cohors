@@ -1,5 +1,5 @@
 ---
-amis:
+ami:
   xenial:
     us_west_2:  ami-b9ff39d9
     us_west_1:  ami-b20542d2

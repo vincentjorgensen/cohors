@@ -1,24 +1,24 @@
 ---
-ami:
+amis:
   xenial:
-    us_west_2:  ami-d06a90b0 
-    us_west_1:  ami-08490c68 
-    us_east_1:  ami-f652979b 
-    eu_west_1:  ami-0ae77879 
-    eu_central_1:  ami-79f51c16 
-    ap_southeast_1:  ami-e7a67584 
-    ap_southeast_2:  ami-61e3ca02 
-    ap_northeast_1:  ami-b601ead7 
-    ap_northeast_2:  ami-a3915acd 
-    sa_east_1:  ami-09991365 
+    us_west_2:  ami-b9ff39d9
+    us_west_1:  ami-b20542d2
+    us_east_1:  ami-ddf13fb0
+    eu_west_1:  ami-a4d44ed7
+    eu_central_1:  ami-26e70c49
+    ap_southeast_1:  ami-fc37e59f
+    ap_southeast_2:  ami-a387afc0
+    ap_northeast_1:  ami-b7d829d6
+    ap_northeast_2:  ami-a3915acd
+    sa_east_1:  ami-78a93c14
   trusty:
-    us_west_2:  ami-6635cd06 
-    us_west_1:  ami-31106a51 
-    us_east_1:  ami-db24d8b6 
-    eu_west_1:  ami-8328bbf0 
-    eu_central_1:  ami-74ee001b 
-    ap_southeast_1:  ami-c4ae7ea7 
-    ap_southeast_2:  ami-d5cae4b6 
-    ap_northeast_1:  ami-bb32ddda 
-    ap_northeast_2:  ami-7a9b5014 
-    sa_east_1:  ami-0c51da60 
+    us_west_2:  ami-42569022
+    us_west_1:  ami-992661f9
+    us_east_1:  ami-2d39803a
+    eu_west_1:  ami-02b62c71
+    eu_central_1:  ami-4bd03b24
+    ap_southeast_1:  ami-ea2bf989
+    ap_southeast_2:  ami-396a415a
+    ap_northeast_1:  ami-2e63924f
+    ap_northeast_2:  ami-7a9b5014
+    sa_east_1:  ami-d952c7b5
